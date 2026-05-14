@@ -195,7 +195,7 @@ describe('chatCommand', () => {
       result = await saveCommand?.action?.(mockContext, tag);
       expect(mockSaveCheckpoint).toHaveBeenCalledWith(
         {
-          history: expect.any(Array),
+          version: '2.0',
           authType: AuthType.LOGIN_WITH_GOOGLE,
           trajectories: {},
           messages: [],
@@ -242,7 +242,7 @@ describe('chatCommand', () => {
       expect(mockCheckpointExists).not.toHaveBeenCalled(); // Should skip existence check
       expect(mockSaveCheckpoint).toHaveBeenCalledWith(
         {
-          history,
+          version: '2.0',
           authType: AuthType.LOGIN_WITH_GOOGLE,
           trajectories: {},
           messages: [],
