@@ -142,7 +142,7 @@ const saveCommand: SlashCommand = {
       const trajectories = await chat.getSubagentTrajectories();
       const messages = chat.getConversation()?.messages ?? [];
       await logger.saveCheckpoint(
-        { history, authType, trajectories, messages },
+        { version: '2.0', authType, trajectories, messages },
         tag,
       );
       return {
