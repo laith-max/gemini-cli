@@ -57,18 +57,10 @@ export function serializeHistoryToMarkdown(
  */
 export interface ExportHistoryOptions {
   /**
-<<<<<<< HEAD
    * Optional full message records which contain metadata like agentId for tool calls,
    * providing the link between history and trajectories.
    */
   messages?: MessageRecord[];
-=======
-   * Full message records which contain metadata like agentId for tool calls,
-   * providing the link between history and trajectories.
-   * This is the primary source of truth.
-   */
-  messages: MessageRecord[];
->>>>>>> 0e381108e (feat: foundation for subagent trajectories (Stage 1))
   /** The file path to export to. */
   filePath: string;
   /** Optional subagent trajectories to include. */
@@ -89,38 +81,18 @@ export async function exportHistoryToFile(
   const {
     messages,
     filePath,
-<<<<<<< HEAD
-    trajectories: _trajectories, // Collected but not yet included in Stage 1 JSON output
-=======
-    trajectories,
->>>>>>> 0e381108e (feat: foundation for subagent trajectories (Stage 1))
+    trajectories: _trajectories, // Collected but not yet included in Stage 2 JSON output
     history: providedHistory,
   } = options;
   const extension = path.extname(filePath).toLowerCase();
 
   let content: string;
   if (extension === '.json') {
-<<<<<<< HEAD
     // Stage 1 & 2: Maintain legacy behavior - only export the raw history array.
     // Trajectories and messages are collected but not yet included in Stage 2 JSON output.
     content = JSON.stringify(providedHistory ?? [], null, 2);
   } else if (extension === '.md') {
     const history = providedHistory ?? reconstructHistory(messages ?? []);
-=======
-    // In Stage 1, we still save the raw history if provided, for backward compatibility
-    // with existing parsers, but we also include messages and trajectories.
-    if (trajectories && Object.keys(trajectories).length > 0) {
-      content = JSON.stringify(
-        { history: providedHistory, messages, trajectories },
-        null,
-        2,
-      );
-    } else {
-      content = JSON.stringify(providedHistory ?? messages, null, 2);
-    }
-  } else if (extension === '.md') {
-    const history = providedHistory ?? reconstructHistory(messages);
->>>>>>> 0e381108e (feat: foundation for subagent trajectories (Stage 1))
     content = serializeHistoryToMarkdown(history);
   } else {
     throw new Error(

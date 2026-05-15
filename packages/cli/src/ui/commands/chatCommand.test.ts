@@ -194,7 +194,12 @@ describe('chatCommand', () => {
       ]);
       result = await saveCommand?.action?.(mockContext, tag);
       expect(mockSaveCheckpoint).toHaveBeenCalledWith(
-        { history: expect.any(Array), authType: AuthType.LOGIN_WITH_GOOGLE },
+        {
+          history: expect.any(Array),
+          authType: AuthType.LOGIN_WITH_GOOGLE,
+          trajectories: {},
+          messages: [],
+        },
         tag,
       );
       expect(result).toEqual({
@@ -236,7 +241,12 @@ describe('chatCommand', () => {
 
       expect(mockCheckpointExists).not.toHaveBeenCalled(); // Should skip existence check
       expect(mockSaveCheckpoint).toHaveBeenCalledWith(
-        { history, authType: AuthType.LOGIN_WITH_GOOGLE },
+        {
+          history,
+          authType: AuthType.LOGIN_WITH_GOOGLE,
+          trajectories: {},
+          messages: [],
+        },
         tag,
       );
       expect(result).toEqual({
@@ -473,8 +483,10 @@ describe('chatCommand', () => {
         'gemini-conversation-1234567890.json',
       );
       expect(mockExport).toHaveBeenCalledWith({
-        history: mockHistory,
+        messages: [],
         filePath: expectedPath,
+        trajectories: {},
+        history: mockHistory,
       });
       expect(result).toEqual({
         type: 'message',
@@ -488,8 +500,10 @@ describe('chatCommand', () => {
       const result = await shareCommand?.action?.(mockContext, filePath);
       const expectedPath = path.join(process.cwd(), 'my-chat.json');
       expect(mockExport).toHaveBeenCalledWith({
-        history: mockHistory,
+        messages: [],
         filePath: expectedPath,
+        trajectories: {},
+        history: mockHistory,
       });
       expect(result).toEqual({
         type: 'message',
@@ -503,8 +517,10 @@ describe('chatCommand', () => {
       const result = await shareCommand?.action?.(mockContext, filePath);
       const expectedPath = path.join(process.cwd(), 'my-chat.md');
       expect(mockExport).toHaveBeenCalledWith({
-        history: mockHistory,
+        messages: [],
         filePath: expectedPath,
+        trajectories: {},
+        history: mockHistory,
       });
       expect(result).toEqual({
         type: 'message',
@@ -553,8 +569,10 @@ describe('chatCommand', () => {
       await shareCommand?.action?.(mockContext, filePath);
       const expectedPath = path.join(process.cwd(), 'my-chat.json');
       expect(mockExport).toHaveBeenCalledWith({
-        history: mockHistory,
+        messages: [],
         filePath: expectedPath,
+        trajectories: {},
+        history: mockHistory,
       });
     });
 
@@ -563,8 +581,10 @@ describe('chatCommand', () => {
       await shareCommand?.action?.(mockContext, filePath);
       const expectedPath = path.join(process.cwd(), 'my-chat.md');
       expect(mockExport).toHaveBeenCalledWith({
-        history: mockHistory,
+        messages: [],
         filePath: expectedPath,
+        trajectories: {},
+        history: mockHistory,
       });
     });
   });
