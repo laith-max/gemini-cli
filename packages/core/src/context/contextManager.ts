@@ -299,6 +299,14 @@ export class ContextManager {
         type: 'PUSH',
         payload: [pendingRequest],
       });
+
+      // Run the ingestion pipeline on the new nodes before they are rendered.
+      const previewNodeIds = new Set(previewNodes.map((n) => n.id));
+      previewNodes = (await this.orchestrator.executeTriggerSync(
+        'new_message',
+        previewNodes,
+        previewNodeIds,
+      )) as ConcreteNode[];
     }
 
     // --- Hot Start Calibration ---
