@@ -24,6 +24,7 @@ import {
 import { Storage } from '../config/storage.js';
 import * as tomlLoader from './toml-loader.js';
 import { coreEvents } from '../utils/events.js';
+import { MCPServerConfig } from '../config/config.js';
 
 vi.unmock('../config/storage.js');
 
@@ -277,6 +278,70 @@ describe('createPolicyEngineConfig', () => {
         r.mcpName === 'untrusted-server' && r.decision === PolicyDecision.ALLOW,
     );
     expect(untrustedRule).toBeUndefined();
+  });
+
+  it('should automatically allow configured MCP servers in non-interactive mode', async () => {
+    const config = await createPolicyEngineConfig(
+      {
+        mcpServers: {
+          'server-1': new MCPServerConfig('node', []),
+          'server-2': new MCPServerConfig('python', []),
+        },
+      },
+      ApprovalMode.DEFAULT,
+      MOCK_DEFAULT_DIR,
+      false, // non-interactive
+    );
+
+    const rule1 = config.rules?.find(
+      (r) => r.mcpName === 'server-1' && r.decision === PolicyDecision.ALLOW,
+    );
+    const rule2 = config.rules?.find(
+      (r) => r.mcpName === 'server-2' && r.decision === PolicyDecision.ALLOW,
+    );
+
+    expect(rule1).toBeDefined();
+    expect(rule1?.source).toBe('Settings (Headless MCP Auto-Allow)');
+    expect(rule2).toBeDefined();
+    expect(rule2?.source).toBe('Settings (Headless MCP Auto-Allow)');
+  });
+
+  it('should NOT automatically allow configured MCP servers in interactive mode', async () => {
+    const config = await createPolicyEngineConfig(
+      {
+        mcpServers: {
+          'server-1': new MCPServerConfig('node', []),
+        },
+      },
+      ApprovalMode.DEFAULT,
+      MOCK_DEFAULT_DIR,
+      true, // interactive
+    );
+
+    const rule = config.rules?.find(
+      (r) => r.mcpName === 'server-1' && r.decision === PolicyDecision.ALLOW,
+    );
+    expect(rule).toBeUndefined();
+  });
+
+  it('should NOT duplicate allow rules if an MCP server is already explicitly allowed', async () => {
+    const config = await createPolicyEngineConfig(
+      {
+        mcp: { allowed: ['server-1'] },
+        mcpServers: {
+          'server-1': new MCPServerConfig('node', []),
+        },
+      },
+      ApprovalMode.DEFAULT,
+      MOCK_DEFAULT_DIR,
+      false, // non-interactive
+    );
+
+    const rules = config.rules?.filter(
+      (r) => r.mcpName === 'server-1' && r.decision === PolicyDecision.ALLOW,
+    );
+    expect(rules).toHaveLength(1);
+    expect(rules?.[0].source).toBe('Settings (MCP Allowed)');
   });
 
   it('should handle multiple MCP server configurations together', async () => {

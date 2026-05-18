@@ -600,6 +600,27 @@ export async function createPolicyEngineConfig(
     }
   }
 
+  // In non-interactive mode, automatically allow all configured MCP servers.
+  // This ensures that tools provided by these servers are available without
+  // requiring explicit entries in settings.mcp.allowed.
+  if (!interactive && settings.mcpServers) {
+    for (const serverName of Object.keys(settings.mcpServers)) {
+      // Avoid duplicates if already explicitly allowed
+      if (settings.mcp?.allowed?.includes(serverName)) {
+        continue;
+      }
+
+      rules.push({
+        toolName: `${MCP_TOOL_PREFIX}${serverName}_*`,
+        mcpName: serverName,
+        decision: PolicyDecision.ALLOW,
+        priority: ALLOWED_MCP_SERVER_PRIORITY,
+        source: 'Settings (Headless MCP Auto-Allow)',
+        modes: nonPlanModes,
+      });
+    }
+  }
+
   return {
     rules,
     checkers,
