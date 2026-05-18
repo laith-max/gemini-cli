@@ -1,0 +1,38 @@
+## Summary
+
+Enhances MCP policy security by enforcing a default-DENY posture in non-interactive (headless) mode and introducing an explicit opt-in for auto-approving configured MCP tools. This addresses a security finding regarding unvalidated tool execution in programmatic environments.
+
+## Details
+
+The initial implementation automatically allowed all configured MCP tools in headless mode, which created an insecure default. This PR refactors that logic to:
+
+- **Require Opt-in**: Headless auto-approval now requires `mcp.autoAllowInHeadless: true` in settings.
+- **Improve Duplication Check**: Added logic to skip adding auto-allow rules if a server is already covered by an explicit allow, a wildcard allow (`*`), or is marked as trusted.
+- **Consistent Tool Patterns**: Standardized the tool name pattern for wildcard servers to use `mcp_*`.
+- **Maintain Security Principles**: Preserves the core principle of preventing unvalidated tool execution by default while allowing flexibility for trusted programmatic use cases.
+
+### Changes:
+- Modified `PolicySettings` type in `packages/core/src/policy/types.ts` to include `autoAllowInHeadless`.
+- Refactored `createPolicyEngineConfig` in `packages/core/src/policy/config.ts`.
+- Added comprehensive unit tests for the new security logic.
+
+## Related Issues
+
+Fixes #26021
+
+## How to Validate
+
+1. Configure a local MCP server in `~/.gemini/settings.json`.
+2. Run `gemini -p "list tools"`. Verify that MCP tools are **DENIED** by default.
+3. Set `"mcp": { "autoAllowInHeadless": true }` in settings.
+4. Run `gemini -p "list tools"`. Verify that MCP tools are now **ALLOWED**.
+5. Run `npm test -w @google/gemini-cli-core -- src/policy/config.test.ts` to verify the 34 passing unit tests.
+
+## Pre-Merge Checklist
+
+- [x] Updated relevant documentation and README (if needed)
+- [x] Added/updated tests (if needed)
+- [ ] Noted breaking changes (if any)
+- [x] Validated on required platforms/methods:
+  - [x] MacOS
+    - [x] npm run
